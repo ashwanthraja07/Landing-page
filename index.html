@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Techfest 2026 — Hack the Future</title>
+  <meta name="description" content="Techfest 2026 — India's most electrifying college tech festival. 48 hours, 6 domains, unlimited ambition." />
+
+  <!-- Google Fonts: Chakra Petch (display) + Inter (body) + JetBrains Mono (labels) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ================================================================
+       DESIGN TOKENS
+    ================================================================ */
+    :root {
+      /* Backgrounds */
+      --bg-deep:    #0d0d12;
+      --bg-mid:     #131018;
+      --bg-surface: #1a1625;
+
+      /* Accents */
+      --mg:      #ff2e63;   /* magenta */
+      --mg-dim:  rgba(255,46,99,0.16);
+      --mg-glow: rgba(255,46,99,0.50);
+      --cy:      #00e5ff;   /* cyan */
+      --cy-dim:  rgba(0,229,255,0.12);
+      --cy-glow: rgba(0,229,255,0.44);
+      --vi:      #7c3aed;   /* violet ambient */
+
+      /* Text */
+      --tx:   #f0eaf8;
+      --tx-m: #8b8fa8;
+      --tx-d: #3d3d52;
+
+      /* Glass */
+      --glass-bg:  rgba(19,16,24,0.55);
+      --glass-lt:  rgba(255,255,255,0.04);
+      --border-mg: rgba(255,46,99,0.22);
+      --border-cy: rgba(0,229,255,0.22);
+      --border-w:  rgba(255,255,255,0.10);
+
+      /* Type */
+      --font-display: 'Chakra Petch', sans-serif;
+      --font-body:    'Inter', sans-serif;
+      --font-mono:    'JetBrains Mono', monospace;
+
+      /* Misc */
+      --radius: 16px;
+      --ease:   cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    html { scroll-behavior:smooth; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--tx);
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    /* Screen-reader only */
+    .sr-only {
+      position:absolute; width:1px; height:1px; padding:0;
+      margin:-1px; overflow:hidden; clip:rect(0,0,0,0);
+      white-space:nowrap; border-width:0;
+    }
+
+    /* ── Neural-network canvas background ── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      display: block;
+    }
+
+    /* ── CRT scanline overlay ── */
+    #bg-scanlines {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.08) 3px,
+        rgba(0,0,0,0.08) 4px
+      );
+      /* subtle slow flicker */
+      animation: crtFlicker 8s steps(1) infinite;
+    }
+    @keyframes crtFlicker {
+      0%,94%,96%,100% { opacity: 1; }
+      95%             { opacity: 0.88; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #bg-scanlines { animation: none; }
+      #bg-canvas    { display: none; }
+    }
+
+    /* ================================================================
+       LAYOUT UTILITIES
+    ================================================================ */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 80px;
+      position: relative;
+      z-index: 1;
+    }
+    @media(max-width:1024px){ .container { padding: 0 40px; } }
+    @media(max-width:600px) { .container { padding: 0 20px; } }
+
+    .section { padding: 120px 0; position:relative; }
+    @media(max-width:768px) { .section { padding: 80px 0; } }
+    @media(max-width:480px) { .section { padding: 64px 0; } }
+
+    /* Section label */
+    .s-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--cy);
+      margin-bottom: 14px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .s-label::before { content:'//'; opacity:0.5; }
+
+    /* Section title */
+    .s-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+      font-weight: 700;
+      color: var(--tx);
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+    .s-sub {
+      font-size: 1rem;
+      color: var(--tx-m);
+      max-width: 500px;
+    }
+
+    /* ── Glass mixin utility ── */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(18px) saturate(160%);
+      -webkit-backdrop-filter: blur(18px) saturate(160%);
+      border: 1px solid var(--border-mg);
+      border-radius: var(--radius);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    /* ================================================================
+       ANGLED DIVIDERS
+    ================================================================ */
+    .clip-top-right { clip-path: polygon(0 0, 100% 5%, 100% 100%, 0 100%); margin-top:-40px; }
+    .clip-top-left  { clip-path: polygon(0 5%, 100% 0, 100% 100%, 0 100%); margin-top:-40px; }
+
+    /* ================================================================
+       BUTTONS
+    ================================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 28px;
+      height: 48px;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: box-shadow 0.28s var(--ease), transform 0.28s var(--ease), background 0.28s var(--ease), border-color 0.28s var(--ease);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn:focus-visible { outline: 2px solid var(--mg); outline-offset: 3px; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff2e63, #c2004a);
+      color: #fff;
+      box-shadow: 0 0 22px var(--mg-glow);
+    }
+    .btn-primary::before {
+      content:'';
+      position:absolute; inset:0;
+      background: linear-gradient(135deg, #ff5c86, #ff2e63);
+      opacity:0;
+      transition: opacity 0.28s var(--ease);
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 40px var(--mg-glow), 0 0 80px rgba(255,46,99,0.18);
+      transform: translateY(-2px);
+    }
+    .btn-primary:hover::before { opacity:1; }
+    .btn-primary span { position:relative; z-index:1; }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid rgba(0,229,255,0.5);
+      color: var(--cy);
+    }
+    .btn-ghost:hover {
+      background: var(--cy-dim);
+      box-shadow: 0 0 22px var(--cy-glow);
+      transform: translateY(-2px);
+      border-color: var(--cy);
+    }
+
+    /* ================================================================
+       NAVBAR
+    ================================================================ */
+    #navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      transition: background 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+    }
+    #navbar.scrolled {
+      background: rgba(13,13,18,0.90);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-bottom: 1px solid var(--border-mg);
+      box-shadow: 0 4px 40px rgba(255,46,99,0.08);
+    }
+
+    .nav-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 80px;
+    }
+    @media(max-width:1024px){ .nav-wrap { padding: 0 40px; } }
+    @media(max-width:600px)  { .nav-wrap { padding: 0 20px; height:60px; } }
+
+    /* Logo */
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-decoration: none;
+      color: var(--tx);
+      display:flex; align-items:center; gap:10px;
+    }
+    .nav-logo-mark {
+      width:32px; height:32px;
+    }
+    .logo-tf { color: var(--mg); }
+
+    /* Desktop links */
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.87rem;
+      font-weight: 500;
+      color: var(--tx-m);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: color 0.25s var(--ease);
+      position: relative;
+    }
+    .nav-links a::after {
+      content:''; position:absolute; bottom:-4px; left:0; right:0;
+      height:1px; background:var(--cy);
+      transform:scaleX(0); transition:transform 0.25s var(--ease);
+      box-shadow: 0 0 6px var(--cy);
+    }
+    .nav-links a:hover { color:var(--tx); }
+    .nav-links a:hover::after { transform:scaleX(1); }
+    .nav-links a:focus-visible { outline:2px solid var(--cy); border-radius:2px; }
+
+    /* Nav CTA */
+    .nav-cta {
+      display:inline-flex; align-items:center;
+      height:36px; padding:0 18px; border-radius:6px;
+      font-size:0.82rem; font-weight:600; letter-spacing:0.06em;
+      background:linear-gradient(135deg,#ff2e63,#c2004a);
+      color:#fff; text-decoration:none;
+      box-shadow:0 0 16px rgba(255,46,99,0.40);
+      transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease);
+    }
+    .nav-cta:hover {
+      box-shadow:0 0 28px var(--mg-glow);
+      transform: translateY(-1px);
+    }
+    .nav-cta:focus-visible { outline:2px solid var(--mg); outline-offset:3px; }
+
+    /* Hamburger */
+    .nav-ham {
+      display:none; flex-direction:column; gap:5px;
+      cursor:pointer; padding:4px; background:none; border:none;
+    }
+    .nav-ham span {
+      display:block; width:24px; height:2px;
+      background:var(--tx); border-radius:2px;
+      transition:0.3s var(--ease);
+    }
+    .nav-ham.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .nav-ham.open span:nth-child(2) { opacity:0; }
+    .nav-ham.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+    /* Mobile drawer */
+    .nav-drawer {
+      display:none; flex-direction:column;
+      background:rgba(13,13,18,0.96);
+      backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--border-mg);
+      padding:16px 20px 24px;
+    }
+    .nav-drawer.open { display:flex; }
+    .nav-drawer a {
+      color:var(--tx-m); text-decoration:none; font-size:1rem;
+      padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+      transition:color 0.25s var(--ease);
+    }
+    .nav-drawer a:hover { color:var(--cy); }
+    .nav-drawer a:last-child { border:none; }
+
+    @media(max-width:900px) {
+      .nav-links { display:none; }
+      .nav-cta-desktop { display:none; }
+      .nav-ham { display:flex; }
+    }
+
+    /* ================================================================
+       HERO
+    ================================================================ */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    @media(max-width:900px) {
+      .hero-grid { grid-template-columns:1fr; gap:48px; }
+      .hero-visual { order:-1; display:flex; justify-content:center; }
+    }
+
+    /* Hero system label */
+    .hero-sys {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      color: var(--cy);
+      margin-bottom: 22px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .sys-dot {
+      width:6px; height:6px; border-radius:50%;
+      background:var(--cy);
+      box-shadow:0 0 8px var(--cy);
+      animation:blinkDot 2s ease-in-out infinite;
+    }
+    @keyframes blinkDot { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    /* Glitch headline */
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.0;
+      letter-spacing: -0.025em;
+      margin-bottom: 20px;
+      color: var(--tx);
+    }
+    .hero-headline span { display:block; }
+
+    /* The glitched word */
+    .glitch-word {
+      position: relative;
+      display: inline-block;
+      /* Gradient text */
+      background: linear-gradient(90deg, #ff2e63 0%, #f0eaf8 50%, #00e5ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .glitch-word::before,
+    .glitch-word::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 0;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      pointer-events: none;
+    }
+    .glitch-word::before {
+      background: #ff2e63;
+      -webkit-background-clip: text;
+      animation: glitch-r 6s steps(1) infinite;
+    }
+    .glitch-word::after {
+      background: #00e5ff;
+      -webkit-background-clip: text;
+      animation: glitch-b 6s steps(1) infinite;
+    }
+    @keyframes glitch-r {
+      0%,85%,100%  { transform:none; clip-path:none; opacity:0; }
+      86%  { transform:translate(-4px,0); clip-path:polygon(0 15%,100% 15%,100% 40%,0 40%); opacity:0.9; }
+      87%  { transform:translate(3px,0);  clip-path:polygon(0 60%,100% 60%,100% 80%,0 80%); opacity:0.9; }
+      88%  { transform:translate(-2px,0); clip-path:polygon(0 30%,100% 30%,100% 55%,0 55%); opacity:0.9; }
+      89%  { transform:none; opacity:0; }
+    }
+    @keyframes glitch-b {
+      0%,83%,100%  { transform:none; clip-path:none; opacity:0; }
+      84%  { transform:translate(4px,0);  clip-path:polygon(0 60%,100% 60%,100% 85%,0 85%); opacity:0.85; }
+      85%  { transform:translate(-3px,0); clip-path:polygon(0 10%,100% 10%,100% 30%,0 30%); opacity:0.85; }
+      86%  { transform:translate(2px,0);  clip-path:polygon(0 50%,100% 50%,100% 70%,0 70%); opacity:0.85; }
+      87%  { transform:none; opacity:0; }
+    }
+
+    /* Hero sub */
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--tx-m);
+      max-width: 480px;
+      line-height: 1.75;
+      margin-bottom: 32px;
+    }
+
+    /* HUD readout strip */
+    .hud-strip {
+      display: flex;
+      gap: 0;
+      margin-bottom: 40px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-cy);
+      background: rgba(0,229,255,0.04);
+    }
+    .hud-item {
+      flex: 1;
+      padding: 12px 16px;
+      border-right: 1px solid var(--border-cy);
+    }
+    .hud-item:last-child { border-right:none; }
+    .hud-key {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
+      color: var(--tx-m);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .hud-val {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--cy);
+      letter-spacing: 0.06em;
+    }
+    @media(max-width:600px) {
+      .hud-strip { flex-wrap:wrap; }
+      .hud-item { flex:1 1 calc(50% - 1px); }
+      .hud-item:nth-child(2) { border-right:none; }
+    }
+
+    /* CTA row */
+    .hero-ctas {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    @media(max-width:480px) {
+      .hero-ctas { flex-direction:column; }
+      .hero-ctas .btn { width:100%; }
+    }
+
+    /* ── Hero Visual: Hexagonal SVG ── */
+    .hero-visual { display:flex; justify-content:center; align-items:center; }
+    .hex-svg-wrap {
+      width:100%; max-width:480px; position:relative;
+    }
+    .hex-svg-wrap svg { width:100%; height:auto; }
+
+    /* SVG animations */
+    .hex-spin     { animation:hexSpin 25s linear infinite; transform-origin:center; transform-box:fill-box; }
+    .hex-spin-rev { animation:hexSpin 18s linear infinite reverse; transform-origin:center; transform-box:fill-box; }
+    @keyframes hexSpin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+    .circuit-flow { stroke-dasharray:12 18; animation:cFlow 4s linear infinite; }
+    @keyframes cFlow { from{stroke-dashoffset:120} to{stroke-dashoffset:0} }
+    .eye-pulse { animation:eyeBlink 3s ease-in-out infinite; }
+    @keyframes eyeBlink { 0%,100%{opacity:0.9} 50%{opacity:0.2} }
+    .node-pulse { animation:nodePulse 2.5s ease-in-out infinite; }
+    @keyframes nodePulse { 0%,100%{opacity:0.3;r:4} 50%{opacity:1;r:6} }
+    .scan-line { animation:scanMove 5s ease-in-out infinite; }
+    @keyframes scanMove {
+      0%  { transform:translateY(0);  opacity:0.7; }
+      50% { transform:translateY(60px); opacity:0.1; }
+      100%{ transform:translateY(0);  opacity:0.7; }
+    }
+
+    /* ================================================================
+       SECTION BG ALTERNATION + CLIPS
+    ================================================================ */
+    #tracks  { background: var(--bg-mid); padding-top:160px; }
+    #schedule{ background: var(--bg-deep); padding-top:160px; }
+    #stats   { background: var(--bg-mid); padding-top:0; padding-bottom:0; }
+    #speakers{ background: var(--bg-deep); padding-top:160px; }
+    footer   { background: var(--bg-deep); }
+
+    /* ================================================================
+       TRACKS — ASYMMETRIC GLASS GRID
+    ================================================================ */
+    .tracks-header { margin-bottom:56px; }
+
+    /* Asymmetric grid */
+    .tracks-grid {
+      display: grid;
+      grid-template-columns: 7fr 5fr;
+      grid-template-rows: auto auto;
+      gap: 20px;
+    }
+    .tracks-row-2 {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .tracks-row-3 {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    @media(max-width:900px) {
+      .tracks-grid { grid-template-columns:1fr; }
+      .tracks-row-2 { grid-template-columns:1fr 1fr; }
+      .tracks-row-3 { grid-template-columns:1fr; }
+    }
+    @media(max-width:480px) {
+      .tracks-row-2 { grid-template-columns:1fr; }
+    }
+
+    /* Track card */
+    .track-card {
+      padding: 28px;
+      border-radius: var(--radius);
+      background: var(--glass-bg);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border-mg);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+      cursor: default;
+    }
+    /* Top accent line */
+    .track-card::before {
+      content:'';
+      position:absolute; top:0; left:0; right:0; height:2px;
+      background: linear-gradient(90deg, var(--mg), transparent);
+      opacity:0; transition:opacity 0.3s var(--ease);
+    }
+    .track-card:hover {
+      border-color: rgba(255,46,99,0.55);
+      box-shadow: 0 16px 60px rgba(0,0,0,0.6), 0 0 32px rgba(255,46,99,0.22);
+      transform: translateY(-4px);
+    }
+    .track-card:hover::before { opacity:1; }
+    .track-card.cyan-var {
+      border-color: var(--border-cy);
+    }
+    .track-card.cyan-var::before {
+      background: linear-gradient(90deg, var(--cy), transparent);
+    }
+    .track-card.cyan-var:hover {
+      border-color: rgba(0,229,255,0.55);
+      box-shadow: 0 16px 60px rgba(0,0,0,0.6), 0 0 32px rgba(0,229,255,0.20);
+    }
+
+    /* Card tall (large slot) */
+    .track-card-lg { min-height:280px; display:flex; flex-direction:column; justify-content:flex-end; }
+
+    .track-icon {
+      width:48px; height:48px; border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:20px;
+      background: var(--mg-dim);
+      border: 1px solid rgba(255,46,99,0.28);
+    }
+    .track-card.cyan-var .track-icon {
+      background: var(--cy-dim);
+      border-color: rgba(0,229,255,0.28);
+    }
+    .track-icon svg { width:22px; height:22px; }
+
+    .track-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--tx);
+      margin-bottom: 8px;
+    }
+    .track-desc { font-size:0.85rem; color:var(--tx-m); line-height:1.6; }
+
+    .track-tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      color: var(--mg);
+      margin-top: 16px;
+      opacity: 0.75;
+    }
+    .track-card.cyan-var .track-tag { color:var(--cy); }
+
+    /* Large card extra: decorative circuit corner */
+    .track-card-lg .track-deco {
+      position:absolute; top:20px; right:20px;
+      opacity:0.18;
+    }
+
+    /* ================================================================
+       SCHEDULE — TIMELINE
+    ================================================================ */
+    .timeline-wrap {
+      position:relative;
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap:24px;
+      margin-top:60px;
+      padding-top:40px;
+    }
+
+    /* Angled zig-zag SVG connector */
+    .timeline-connector {
+      position:absolute;
+      top:27px; left:7%; right:7%;
+      height:50px;
+      pointer-events:none;
+    }
+    .timeline-connector svg { width:100%; height:100%; overflow:visible; }
+
+    @media(max-width:768px) {
+      .timeline-wrap { grid-template-columns:1fr; gap:40px; padding-top:0; }
+      .timeline-connector { display:none; }
+      .t-step { flex-direction:row; align-items:flex-start; gap:20px; }
+      .t-node  { flex-shrink:0; margin-bottom:0; margin-top:4px; }
+    }
+
+    .t-step {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      text-align:center;
+      position:relative;
+      z-index:1;
+    }
+    @media(max-width:768px) { .t-step { text-align:left; } }
+
+    .t-date {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      color: var(--cy);
+      margin-bottom:12px;
+    }
+
+    /* Hexagonal node */
+    .t-node {
+      width:60px; height:60px;
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:20px;
+      position:relative;
+    }
+    .t-node svg { width:60px; height:60px; }
+    .t-node-num {
+      position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      font-family: var(--font-display);
+      font-size:0.9rem; font-weight:700;
+      color:var(--mg);
+    }
+    .t-step:nth-child(even) .t-node-num { color:var(--cy); }
+
+    .t-title {
+      font-family: var(--font-display);
+      font-size:1rem; font-weight:600;
+      color:var(--tx); margin-bottom:8px;
+    }
+    .t-desc { font-size:0.82rem; color:var(--tx-m); line-height:1.6; }
+
+    /* ================================================================
+       STATS STRIP
+    ================================================================ */
+    #stats {
+      padding: 0;
+      position:relative;
+    }
+    .stats-band {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--border-mg);
+      border-bottom: 1px solid var(--border-mg);
+      padding: 60px 80px;
+    }
+    @media(max-width:768px) { .stats-band { padding:48px 40px; } }
+    @media(max-width:480px) { .stats-band { padding:40px 20px; } }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+      text-align: center;
+    }
+    @media(max-width:768px) { .stats-grid { grid-template-columns:repeat(2,1fr); gap:32px; } }
+    @media(max-width:360px) { .stats-grid { grid-template-columns:1fr 1fr; gap:24px; } }
+
+    .stat-item { display:flex; flex-direction:column; align-items:center; gap:6px; }
+
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem,5vw,3.5rem);
+      font-weight: 700;
+      line-height:1;
+      background: linear-gradient(90deg, var(--mg), var(--cy));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display:flex; align-items:baseline; gap:2px;
+    }
+    .stat-suf {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem,3vw,2rem);
+      font-weight:700;
+      background: linear-gradient(90deg, var(--mg), var(--cy));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--tx-m);
+    }
+
+    /* ================================================================
+       SPEAKERS / JUDGES
+    ================================================================ */
+    .speakers-header { margin-bottom:56px; }
+
+    .speakers-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+    @media(max-width:900px) { .speakers-grid { grid-template-columns:repeat(2,1fr); } }
+    @media(max-width:480px) { .speakers-grid { grid-template-columns:1fr 1fr; gap:14px; } }
+
+    /* ID card */
+    .id-card {
+      padding: 24px;
+      border-radius: var(--radius);
+      background: rgba(13,13,18,0.60);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid var(--border-cy);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.50);
+      position:relative; overflow:hidden;
+      transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+    }
+    .id-card::before {
+      content:'VERIFIED //';
+      position:absolute; top:12px; right:14px;
+      font-family:var(--font-mono); font-size:0.5rem;
+      letter-spacing:0.14em; color:var(--cy); opacity:0.55;
+    }
+    /* Left accent bar */
+    .id-card::after {
+      content:'';
+      position:absolute; top:0; left:0; bottom:0; width:2px;
+      background: linear-gradient(180deg, transparent, var(--cy), transparent);
+      opacity:0; transition:opacity 0.3s var(--ease);
+    }
+    .id-card:hover {
+      border-color: rgba(0,229,255,0.55);
+      box-shadow: 0 16px 60px rgba(0,0,0,0.55), 0 0 28px rgba(0,229,255,0.20);
+      transform: translateY(-4px);
+    }
+    .id-card:hover::after { opacity:1; }
+
+    .id-avatar {
+      width:72px; height:72px; border-radius:50%;
+      border:2px solid rgba(0,229,255,0.40);
+      background: var(--cy-dim);
+      display:flex; align-items:center; justify-content:center;
+      margin-bottom:16px;
+      box-shadow: 0 0 18px rgba(0,229,255,0.18);
+    }
+    .id-avatar svg { width:44px; height:44px; }
+
+    .id-meta { font-family:var(--font-mono); font-size:0.58rem; color:var(--tx-m); letter-spacing:0.1em; margin-bottom:4px; }
+    .id-name { font-family:var(--font-display); font-size:1rem; font-weight:600; color:var(--tx); margin-bottom:3px; }
+    .id-role { font-family:var(--font-mono); font-size:0.68rem; letter-spacing:0.1em; color:var(--cy); margin-bottom:12px; }
+    .id-affil { font-size:0.82rem; color:var(--tx-m); line-height:1.5; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06); font-style:italic; }
+    .id-status {
+      display:inline-flex; align-items:center; gap:5px;
+      font-family:var(--font-mono); font-size:0.58rem;
+      letter-spacing:0.1em; color:var(--cy); margin-top:12px; opacity:0.72;
+    }
+    .id-status-dot {
+      width:4px; height:4px; border-radius:50%;
+      background:var(--cy); box-shadow:0 0 5px var(--cy);
+      animation:blinkDot 2s ease-in-out infinite;
+    }
+
+    /* ================================================================
+       FOOTER
+    ================================================================ */
+    footer {
+      padding: 80px 0 32px;
+      border-top: 1px solid transparent;
+      position:relative; z-index:1;
+    }
+
+    /* Glowing divider */
+    .footer-divider {
+      width:100%;
+      height:1px;
+      background: linear-gradient(90deg, transparent, var(--mg), var(--cy), transparent);
+      box-shadow: 0 0 16px rgba(255,46,99,0.30), 0 0 32px rgba(0,229,255,0.15);
+      margin-bottom:60px;
+    }
+
+    .footer-grid {
+      display:grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap:48px;
+      margin-bottom:48px;
+    }
+    @media(max-width:900px) { .footer-grid { grid-template-columns:1fr 1fr; gap:32px; } }
+    @media(max-width:600px) { .footer-grid { grid-template-columns:1fr; gap:28px; } }
+
+    .footer-brand .nav-logo { margin-bottom:14px; display:inline-flex; }
+    .footer-brand p { font-size:0.87rem; color:var(--tx-m); line-height:1.7; max-width:280px; }
+    .footer-social { display:flex; gap:10px; margin-top:20px; }
+    .soc-btn {
+      width:38px; height:38px; border-radius:8px;
+      border:1px solid var(--border-mg);
+      background:var(--glass-lt);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--tx-m); text-decoration:none;
+      transition: border-color 0.25s var(--ease), color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+    }
+    .soc-btn:hover {
+      border-color:var(--mg); color:var(--mg);
+      box-shadow:0 0 14px var(--mg-glow);
+    }
+    .soc-btn:focus-visible { outline:2px solid var(--mg); outline-offset:3px; }
+    .soc-btn svg { width:16px; height:16px; fill:currentColor; }
+
+    .footer-heading {
+      font-family:var(--font-mono);
+      font-size:0.65rem; letter-spacing:0.18em;
+      text-transform:uppercase; color:var(--mg);
+      margin-bottom:16px;
+    }
+    .footer-links { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .footer-links a {
+      font-size:0.87rem; color:var(--tx-m);
+      text-decoration:none; transition:color 0.25s var(--ease);
+    }
+    .footer-links a:hover { color:var(--cy); }
+    .footer-links a:focus-visible { outline:2px solid var(--cy); border-radius:2px; }
+
+    /* Sponsors row */
+    .sponsors-row {
+      display:flex; gap:20px; flex-wrap:wrap; align-items:center; margin-top:14px;
+    }
+    .sponsor-badge {
+      height:30px; padding:0 14px;
+      border-radius:6px;
+      border:1px solid var(--border-w);
+      background:var(--glass-lt);
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--font-mono); font-size:0.65rem;
+      letter-spacing:0.12em; color:var(--tx-m);
+    }
+
+    .footer-bottom {
+      display:flex; justify-content:space-between; align-items:center;
+      padding-top:24px;
+      border-top:1px solid rgba(255,255,255,0.05);
+    }
+    @media(max-width:600px) { .footer-bottom { flex-direction:column; gap:10px; text-align:center; } }
+    .footer-copy { font-family:var(--font-mono); font-size:0.62rem; color:var(--tx-d); letter-spacing:0.06em; }
+    .footer-build { font-family:var(--font-mono); font-size:0.6rem; color:var(--cy); opacity:0.45; letter-spacing:0.1em; }
+
+    /* ================================================================
+       REDUCED MOTION
+    ================================================================ */
+    @media(prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Animated neural-network canvas background -->
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+<!-- CRT scanline overlay -->
+<div id="bg-scanlines" aria-hidden="true"></div>
+
+<!-- ================================================================
+     NAVBAR
+================================================================ -->
+<nav id="navbar" role="navigation" aria-label="Main navigation">
+  <div class="nav-wrap">
+
+    <!-- Logo -->
+    <a href="#hero" class="nav-logo" aria-label="Techfest Home">
+      <span>TechFest</span>
+    </a>
+
+    <!-- Desktop nav links -->
+    <ul class="nav-links" role="list">
+      <li><a href="#tracks">Events</a></li>
+      <li><a href="#schedule">Schedule</a></li>
+      <li><a href="#speakers">Speakers</a></li>
+      <li><a href="#stats">Stats</a></li>
+    </ul>
+
+    <!-- Desktop CTA -->
+    <a href="#hero" class="nav-cta nav-cta-desktop" id="nav-register-btn">Register</a>
+
+    <!-- Hamburger (mobile) -->
+    <button class="nav-ham" id="hamburger" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Mobile drawer -->
+  <div class="nav-drawer" id="mobileDrawer" role="menu">
+    <a href="#tracks"   role="menuitem">Events</a>
+    <a href="#schedule" role="menuitem">Schedule</a>
+    <a href="#speakers" role="menuitem">Speakers</a>
+    <a href="#stats"    role="menuitem">Stats</a>
+    <a href="#hero"     role="menuitem" style="color:var(--mg);font-weight:600">Register →</a>
+  </div>
+</nav>
+
+<!-- ================================================================
+     HERO
+================================================================ -->
+<section id="hero" aria-label="Hero">
+  <div class="container">
+    <div class="hero-grid">
+
+      <!-- Copy -->
+      <div>
+        <div class="hero-sys" aria-label="System status: Techfest 2026 System Boot">
+          <div class="sys-dot" aria-hidden="true"></div>
+          // TECHFEST_2026
+        </div>
+
+        <h1 class="hero-headline">
+          <span>HACK THE</span>
+          <span class="glitch-word" data-text="FUTURE.">FUTURE.</span>
+        </h1>
+
+        <p class="hero-sub">
+          India's most electrifying college tech festival. 48 hours, 6 domains, unlimited ambition. Are you ready to rewrite the rules?
+        </p>
+
+        <!-- HUD readout strip -->
+        <div class="hud-strip" role="region" aria-label="Event details">
+          <div class="hud-item">
+            <div class="hud-key">Venue</div>
+            <div class="hud-val">IIT MUMBAI</div>
+          </div>
+          <div class="hud-item">
+            <div class="hud-key">Date</div>
+            <div class="hud-val">14–16 NOV</div>
+          </div>
+          <div class="hud-item">
+            <div class="hud-key">Edition</div>
+            <div class="hud-val">12TH</div>
+          </div>
+          <div class="hud-item">
+            <div class="hud-key">Status</div>
+            <div class="hud-val" style="color:var(--mg)">OPEN</div>
+          </div>
+        </div>
+
+        <!-- CTA buttons -->
+        <div class="hero-ctas">
+          <a href="#tracks" class="btn btn-primary" id="hero-register-btn">
+            <span>Register Now</span>
+            <span aria-hidden="true">→</span>
+          </a>
+          <a href="#tracks" class="btn btn-ghost" id="hero-explore-btn">
+            <span>Explore Events</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Hero Visual: Animated Cyborg Hex SVG -->
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hex-svg-wrap">
+          <svg viewBox="0 0 480 480" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="hr1" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.45"/>
+                <stop offset="70%" stop-color="#ff2e63" stop-opacity="0.08"/>
+                <stop offset="100%" stop-color="#0d0d12" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="hg1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#ff2e63"/>
+                <stop offset="100%" stop-color="#00e5ff"/>
+              </linearGradient>
+              <filter id="hglow">
+                <feGaussianBlur stdDeviation="4" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- Background aura -->
+            <circle cx="240" cy="240" r="220" fill="url(#hr1)"/>
+
+            <!-- Outer hex ring (CW) -->
+            <g class="hex-spin">
+              <!-- Hexagon outline -->
+              <polygon points="240,40 400,130 400,350 240,440 80,350 80,130"
+                fill="none" stroke="url(#hg1)" stroke-width="1" stroke-opacity="0.35"
+                stroke-dasharray="14 10"/>
+              <!-- Corner accent dots -->
+              <circle cx="240" cy="40"  r="5" fill="#ff2e63" filter="url(#hglow)"/>
+              <circle cx="400" cy="130" r="5" fill="#00e5ff" filter="url(#hglow)"/>
+              <circle cx="400" cy="350" r="5" fill="#ff2e63" filter="url(#hglow)"/>
+              <circle cx="240" cy="440" r="5" fill="#00e5ff" filter="url(#hglow)"/>
+              <circle cx="80"  cy="350" r="5" fill="#ff2e63" filter="url(#hglow)"/>
+              <circle cx="80"  cy="130" r="5" fill="#00e5ff" filter="url(#hglow)"/>
+            </g>
+
+            <!-- Middle hex ring (CCW) -->
+            <g class="hex-spin-rev">
+              <polygon points="240,90 370,163 370,317 240,390 110,317 110,163"
+                fill="none" stroke="url(#hg1)" stroke-width="1.5" stroke-opacity="0.4"
+                stroke-dasharray="8 16"/>
+              <circle cx="240" cy="90"  r="4" fill="#ff2e63" filter="url(#hglow)"/>
+              <circle cx="370" cy="163" r="4" fill="#00e5ff" filter="url(#hglow)"/>
+              <circle cx="110" cy="317" r="4" fill="#ff2e63" filter="url(#hglow)"/>
+            </g>
+
+            <!-- Static inner hex -->
+            <polygon points="240,140 320,187 320,280 240,327 160,280 160,187"
+              fill="rgba(124,58,237,0.06)" stroke="url(#hg1)" stroke-width="2"
+              filter="url(#hglow)"/>
+
+            <!-- Radial circuit lines -->
+            <line x1="240" y1="140" x2="240" y2="187" stroke="url(#hg1)" stroke-width="1.5" class="circuit-flow" filter="url(#hglow)"/>
+            <line x1="320" y1="187" x2="320" y2="240" stroke="url(#hg1)" stroke-width="1.5" class="circuit-flow" style="animation-delay:1s" filter="url(#hglow)"/>
+            <line x1="320" y1="280" x2="240" y2="327" stroke="url(#hg1)" stroke-width="1.5" class="circuit-flow" style="animation-delay:2s" filter="url(#hglow)"/>
+            <line x1="160" y1="280" x2="160" y2="240" stroke="url(#hg1)" stroke-width="1.5" class="circuit-flow" style="animation-delay:3s" filter="url(#hglow)"/>
+
+            <!-- Cyborg face structure -->
+            <!-- Eyes -->
+            <g filter="url(#hglow)">
+              <ellipse cx="218" cy="228" rx="12" ry="7" fill="rgba(255,46,99,0.12)" stroke="#ff2e63" stroke-width="1.5"/>
+              <ellipse cx="218" cy="228" rx="5" ry="5" fill="#ff2e63" class="eye-pulse"/>
+
+              <ellipse cx="262" cy="228" rx="12" ry="7" fill="rgba(0,229,255,0.10)" stroke="#00e5ff" stroke-width="1.5"/>
+              <ellipse cx="262" cy="228" rx="5" ry="5" fill="#00e5ff" class="eye-pulse" style="animation-delay:0.5s"/>
+            </g>
+
+            <!-- Face lines -->
+            <line x1="218" y1="238" x2="218" y2="252" stroke="#ff2e63" stroke-width="1" opacity="0.5"/>
+            <line x1="262" y1="238" x2="262" y2="252" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+            <line x1="208" y1="248" x2="272" y2="248" stroke="url(#hg1)" stroke-width="1" opacity="0.4"/>
+
+            <!-- Circuit pads -->
+            <rect x="172" y="168" width="26" height="8" rx="2" fill="#ff2e63" opacity="0.55"/>
+            <rect x="282" y="168" width="26" height="8" rx="2" fill="#00e5ff" opacity="0.55"/>
+            <rect x="172" y="305" width="26" height="8" rx="2" fill="#00e5ff" opacity="0.55"/>
+            <rect x="282" y="305" width="26" height="8" rx="2" fill="#ff2e63" opacity="0.55"/>
+
+            <!-- Scan line -->
+            <rect x="160" y="210" width="160" height="2" fill="url(#hg1)" opacity="0.6" class="scan-line"/>
+
+            <!-- Hex vertex pulse nodes -->
+            <circle cx="240" cy="140" r="4" fill="#ff2e63" class="node-pulse" filter="url(#hglow)"/>
+            <circle cx="320" cy="187" r="4" fill="#00e5ff" class="node-pulse" style="animation-delay:0.5s" filter="url(#hglow)"/>
+            <circle cx="320" cy="280" r="4" fill="#ff2e63" class="node-pulse" style="animation-delay:1s"  filter="url(#hglow)"/>
+            <circle cx="240" cy="327" r="4" fill="#00e5ff" class="node-pulse" style="animation-delay:1.5s" filter="url(#hglow)"/>
+            <circle cx="160" cy="280" r="4" fill="#ff2e63" class="node-pulse" style="animation-delay:2s"  filter="url(#hglow)"/>
+            <circle cx="160" cy="187" r="4" fill="#00e5ff" class="node-pulse" style="animation-delay:2.5s" filter="url(#hglow)"/>
+
+            <!-- HUD bracket corners -->
+            <path d="M 160 160 L 140 160 L 140 140" stroke="#ff2e63" stroke-width="1.5" fill="none" opacity="0.7"/>
+            <path d="M 320 160 L 340 160 L 340 140" stroke="#ff2e63" stroke-width="1.5" fill="none" opacity="0.7"/>
+            <path d="M 160 320 L 140 320 L 140 340" stroke="#00e5ff" stroke-width="1.5" fill="none" opacity="0.7"/>
+            <path d="M 320 320 L 340 320 L 340 340" stroke="#00e5ff" stroke-width="1.5" fill="none" opacity="0.7"/>
+
+            <!-- Chromatic aberration micro slices (decorative) -->
+            <line x1="155" y1="200" x2="185" y2="200" stroke="#ff2e63" stroke-width="1.5" opacity="0.4"/>
+            <line x1="157" y1="200" x2="187" y2="200" stroke="#00e5ff" stroke-width="1.5" opacity="0.25" transform="translate(4,0)"/>
+            <line x1="295" y1="265" x2="325" y2="265" stroke="#ff2e63" stroke-width="1.5" opacity="0.4"/>
+            <line x1="295" y1="265" x2="325" y2="265" stroke="#00e5ff" stroke-width="1.5" opacity="0.25" transform="translate(-4,0)"/>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     EVENT TRACKS
+================================================================ -->
+<section id="tracks" class="section clip-top-left" aria-labelledby="tracks-heading">
+  <div class="container">
+    <div class="tracks-header">
+      <div class="s-label">EVENT_TRACKS</div>
+      <h2 class="s-title" id="tracks-heading">Choose Your Arena</h2>
+      <p class="s-sub">Six battlegrounds. One champion. Select the domain where you'll leave your mark on the future.</p>
+    </div>
+
+    <!-- Asymmetric grid -->
+    <div class="tracks-grid">
+
+      <!-- Large card — AI/ML -->
+      <div class="track-card track-card-lg" id="track-ai">
+        <!-- Decorative corner circuit -->
+        <div class="track-deco" aria-hidden="true">
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+            <path d="M80 0 L80 80 L0 80" stroke="#ff2e63" stroke-width="1" stroke-dasharray="6 8"/>
+            <circle cx="80" cy="80" r="4" fill="#ff2e63" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="track-icon" aria-hidden="true">
+          <!-- Neural net icon -->
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <circle cx="4" cy="11" r="2.5" stroke="#ff2e63" stroke-width="1.5"/>
+            <circle cx="11" cy="4" r="2.5" stroke="#ff2e63" stroke-width="1.5"/>
+            <circle cx="11" cy="18" r="2.5" stroke="#ff2e63" stroke-width="1.5"/>
+            <circle cx="18" cy="11" r="2.5" stroke="#ff2e63" stroke-width="1.5"/>
+            <line x1="6.5" y1="11" x2="8.5" y2="11"  stroke="#ff2e63" stroke-width="1.2" opacity="0.7"/>
+            <line x1="11" y1="6.5" x2="11" y2="8.5"  stroke="#ff2e63" stroke-width="1.2" opacity="0.7"/>
+            <line x1="11" y1="13.5" x2="11" y2="15.5" stroke="#ff2e63" stroke-width="1.2" opacity="0.7"/>
+            <line x1="15.5" y1="11" x2="13.5" y2="11" stroke="#ff2e63" stroke-width="1.2" opacity="0.7"/>
+            <circle cx="11" cy="11" r="3" stroke="#ff2e63" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <div class="track-name">AI / ML Arena</div>
+        <p class="track-desc">Train models, crack benchmarks, and deploy intelligent systems in real-time challenges against the best minds.</p>
+        <div class="track-tag">TRACK_01 // ARTIFICIAL INTELLIGENCE</div>
+      </div>
+
+      <!-- Small card — Cyber -->
+      <div class="track-card cyan-var" id="track-cyber">
+        <div class="track-icon" aria-hidden="true">
+          <!-- Lock circuit icon -->
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="4" y="10" width="14" height="10" rx="2" stroke="#00e5ff" stroke-width="1.5"/>
+            <path d="M7 10V7a4 4 0 0 1 8 0v3" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="11" cy="15" r="2" fill="#00e5ff" opacity="0.8"/>
+            <line x1="4" y1="13" x2="2" y2="13" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+            <line x1="18" y1="13" x2="20" y2="13" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="track-name">Cyber Warfare</div>
+        <p class="track-desc">Red team vs. Blue team CTF battles. Exploit, defend, reverse-engineer.</p>
+        <div class="track-tag">TRACK_02 // CYBERSECURITY</div>
+      </div>
+
+    </div><!-- end .tracks-grid -->
+
+    <!-- Row 2 -->
+    <div class="tracks-row-2" style="margin-top:20px">
+      <div class="track-card" id="track-quantum">
+        <div class="track-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <circle cx="11" cy="11" r="3" stroke="#ff2e63" stroke-width="1.5"/>
+            <ellipse cx="11" cy="11" rx="9" ry="4" stroke="#ff2e63" stroke-width="1.2" opacity="0.6"/>
+            <ellipse cx="11" cy="11" rx="9" ry="4" stroke="#ff2e63" stroke-width="1.2" opacity="0.6" transform="rotate(60 11 11)"/>
+            <ellipse cx="11" cy="11" rx="9" ry="4" stroke="#ff2e63" stroke-width="1.2" opacity="0.6" transform="rotate(120 11 11)"/>
+          </svg>
+        </div>
+        <div class="track-name">Quantum Lab</div>
+        <p class="track-desc">Harness superposition on real IBM Quantum hardware.</p>
+        <div class="track-tag">TRACK_03 // QUANTUM</div>
+      </div>
+
+      <div class="track-card cyan-var" id="track-robotics">
+        <div class="track-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="7" y="1" width="8" height="6" rx="1" stroke="#00e5ff" stroke-width="1.5"/>
+            <rect x="3" y="9" width="16" height="10" rx="2" stroke="#00e5ff" stroke-width="1.5"/>
+            <line x1="1" y1="12" x2="3" y2="12" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="19" y1="12" x2="21" y2="12" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="11" y1="7" x2="11" y2="9" stroke="#00e5ff" stroke-width="1.5"/>
+            <circle cx="8" cy="14" r="2" fill="#00e5ff" opacity="0.8"/>
+            <circle cx="14" cy="14" r="2" fill="#00e5ff" opacity="0.8"/>
+          </svg>
+        </div>
+        <div class="track-name">Robotics Pit</div>
+        <p class="track-desc">Autonomous machines that sense, decide, and act in live arenas.</p>
+        <div class="track-tag">TRACK_04 // ROBOTICS</div>
+      </div>
+
+      <div class="track-card" id="track-hardware">
+        <div class="track-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="6" y="6" width="10" height="10" rx="1" stroke="#ff2e63" stroke-width="1.5"/>
+            <line x1="9" y1="1" x2="9" y2="6"  stroke="#ff2e63" stroke-width="1.2"/>
+            <line x1="13" y1="1" x2="13" y2="6" stroke="#ff2e63" stroke-width="1.2"/>
+            <line x1="9" y1="16" x2="9" y2="21"  stroke="#ff2e63" stroke-width="1.2"/>
+            <line x1="13" y1="16" x2="13" y2="21" stroke="#ff2e63" stroke-width="1.2"/>
+            <line x1="1" y1="9"  x2="6" y2="9"  stroke="#ff2e63" stroke-width="1.2"/>
+            <line x1="1" y1="13" x2="6" y2="13" stroke="#ff2e63" stroke-width="1.2"/>
+            <line x1="16" y1="9"  x2="21" y2="9"  stroke="#ff2e63" stroke-width="1.2"/>
+            <line x1="16" y1="13" x2="21" y2="13" stroke="#ff2e63" stroke-width="1.2"/>
+            <circle cx="11" cy="11" r="2" fill="#ff2e63" opacity="0.8"/>
+          </svg>
+        </div>
+        <div class="track-name">Hardware Hack</div>
+        <p class="track-desc">Solder, prototype, and ship real embedded systems fast.</p>
+        <div class="track-tag">TRACK_05 // HARDWARE</div>
+      </div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="tracks-row-3" style="margin-top:20px">
+      <div class="track-card cyan-var" id="track-open">
+        <div class="track-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M11 2 L13.5 8.5 L21 9 L15.5 14 L17.5 21 L11 17.5 L4.5 21 L6.5 14 L1 9 L8.5 8.5 Z" stroke="#00e5ff" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="11" cy="11" r="2" fill="#00e5ff" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="track-name">Open Innovation</div>
+        <p class="track-desc">No constraints. Any domain, any stack — just build something that changes the world.</p>
+        <div class="track-tag">TRACK_06 // OPEN</div>
+      </div>
+
+      <!-- Bonus card: BCI -->
+      <div class="track-card" id="track-bci">
+        <div class="track-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M11 4 C7 4 4 7 4 10 C4 14 7 16 11 17 C15 16 18 14 18 10 C18 7 15 4 11 4Z" stroke="#ff2e63" stroke-width="1.5"/>
+            <line x1="11" y1="17" x2="11" y2="21" stroke="#ff2e63" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="8" y1="8" x2="8" y2="13" stroke="#ff2e63" stroke-width="1.2" opacity="0.7"/>
+            <line x1="11" y1="7" x2="11" y2="14" stroke="#ff2e63" stroke-width="1.2" opacity="0.7"/>
+            <line x1="14" y1="8" x2="14" y2="13" stroke="#ff2e63" stroke-width="1.2" opacity="0.7"/>
+          </svg>
+        </div>
+        <div class="track-name">Brain-Computer Interface</div>
+        <p class="track-desc">Wire EEG into software. Control code with thought. The boundary is yours to blur.</p>
+        <div class="track-tag">TRACK_07 // BCI</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================================================================
+     SCHEDULE / TIMELINE
+================================================================ -->
+<section id="schedule" class="section clip-top-right" aria-labelledby="schedule-heading">
+  <div class="container">
+    <div class="s-label">PROTOCOL_SEQUENCE</div>
+    <h2 class="s-title" id="schedule-heading">The Countdown</h2>
+    <p class="s-sub">Four critical milestones on the path from registration to the grand finale stage.</p>
+
+    <div class="timeline-wrap" role="list">
+
+      <!-- Zig-zag SVG connector (desktop only) -->
+      <div class="timeline-connector" aria-hidden="true">
+        <svg viewBox="0 0 900 50" preserveAspectRatio="none" fill="none">
+          <path d="M 0 40 L 200 10 L 450 40 L 700 10 L 900 40"
+            stroke="url(#tg)" stroke-width="2" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="tg" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#ff2e63"/>
+              <stop offset="100%" stop-color="#00e5ff"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <!-- Step 1 -->
+      <div class="t-step" role="listitem" id="step-reg">
+        <div class="t-date">OCT 01</div>
+        <div class="t-node" aria-label="Step 1">
+          <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="30,4 56,17 56,43 30,56 4,43 4,17"
+              fill="rgba(255,46,99,0.08)" stroke="#ff2e63" stroke-width="1.8"
+              filter="url(#hglow)"/>
+          </svg>
+          <div class="t-node-num">01</div>
+        </div>
+        <div class="t-title">Registration Opens</div>
+        <p class="t-desc">Create your team profile and lock in your track selection. Early bird slots limited.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="t-step" role="listitem" id="step-shortlist">
+        <div class="t-date">NOV 01</div>
+        <div class="t-node" aria-label="Step 2">
+          <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="30,4 56,17 56,43 30,56 4,43 4,17"
+              fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.8"
+              filter="url(#hglow)"/>
+          </svg>
+          <div class="t-node-num">02</div>
+        </div>
+        <div class="t-title">Shortlist Announced</div>
+        <p class="t-desc">Top 200 teams qualify for on-site participation. Results published on the portal.</p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="t-step" role="listitem" id="step-hack">
+        <div class="t-date">NOV 14</div>
+        <div class="t-node" aria-label="Step 3">
+          <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="30,4 56,17 56,43 30,56 4,43 4,17"
+              fill="rgba(255,46,99,0.08)" stroke="#ff2e63" stroke-width="1.8"
+              filter="url(#hglow)"/>
+          </svg>
+          <div class="t-node-num">03</div>
+        </div>
+        <div class="t-title">Hack Begins</div>
+        <p class="t-desc">48 hours. IIT Mumbai labs. Real hardware, live cloud credits, mentor access around the clock.</p>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="t-step" role="listitem" id="step-finale">
+        <div class="t-date">NOV 16</div>
+        <div class="t-node" aria-label="Step 4">
+          <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="30,4 56,17 56,43 30,56 4,43 4,17"
+              fill="rgba(0,229,255,0.08)" stroke="#00e5ff" stroke-width="1.8"
+              filter="url(#hglow)"/>
+          </svg>
+          <div class="t-node-num">04</div>
+        </div>
+        <div class="t-title">Grand Finale</div>
+        <p class="t-desc">Present to a jury of CTOs and VCs. Winners receive cash prizes, patents, and seed funding.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     STATS STRIP
+================================================================ -->
+<section id="stats" aria-labelledby="stats-heading">
+  <h2 class="sr-only" id="stats-heading">Key Statistics</h2>
+  <div class="stats-band">
+    <div class="container" style="padding-top:0;padding-bottom:0;">
+      <div class="stats-grid" role="list">
+
+        <div class="stat-item" role="listitem" id="stat-participants">
+          <div class="stat-number">
+            <span class="counter" data-target="10">0</span><span class="stat-suf">K+</span>
+          </div>
+          <div class="stat-label">Participants</div>
+        </div>
+
+        <div class="stat-item" role="listitem" id="stat-prize">
+          <div class="stat-number">
+            ₹<span class="counter" data-target="50">0</span><span class="stat-suf">L+</span>
+          </div>
+          <div class="stat-label">Prize Pool</div>
+        </div>
+
+        <div class="stat-item" role="listitem" id="stat-events">
+          <div class="stat-number">
+            <span class="counter" data-target="120">0</span><span class="stat-suf">+</span>
+          </div>
+          <div class="stat-label">Events</div>
+        </div>
+
+        <div class="stat-item" role="listitem" id="stat-colleges">
+          <div class="stat-number">
+            <span class="counter" data-target="400">0</span><span class="stat-suf">+</span>
+          </div>
+          <div class="stat-label">Colleges</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SPEAKERS / JUDGES
+================================================================ -->
+<section id="speakers" class="section clip-top-left" aria-labelledby="speakers-heading">
+  <div class="container">
+    <div class="speakers-header">
+      <div class="s-label">SPEAKERS_JUDGES</div>
+      <h2 class="s-title" id="speakers-heading">The Jury</h2>
+      <p class="s-sub">Industry veterans, researchers, and founders who decide your fate — and your funding.</p>
+    </div>
+
+    <div class="speakers-grid">
+
+      <!-- Card 1 -->
+      <div class="id-card" id="card-priya">
+        <div class="id-meta">AGENT_ID: JDG-001</div>
+        <div class="id-avatar" aria-hidden="true">
+          <svg viewBox="0 0 44 44" fill="none">
+            <circle cx="22" cy="15" r="8" fill="rgba(0,229,255,0.18)" stroke="#00e5ff" stroke-width="1.5"/>
+            <path d="M8 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="18" cy="14" r="2.5" fill="#ff2e63" opacity="0.9"/>
+            <circle cx="26" cy="14" r="2.5" fill="#00e5ff" opacity="0.9"/>
+            <line x1="16" y1="19" x2="28" y2="19" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="id-name">Dr. Priya Iyer</div>
+        <div class="id-role">CHIEF AI OFFICER</div>
+        <div class="id-affil">"The best solutions emerge when constraints force creativity."</div>
+        <div class="id-status"><div class="id-status-dot"></div>ONLINE // BENGALURU</div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="id-card" id="card-arjun">
+        <div class="id-meta">AGENT_ID: JDG-002</div>
+        <div class="id-avatar" aria-hidden="true">
+          <svg viewBox="0 0 44 44" fill="none">
+            <circle cx="22" cy="15" r="8" fill="rgba(255,46,99,0.15)" stroke="#ff2e63" stroke-width="1.5"/>
+            <path d="M8 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#ff2e63" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="19" cy="14" r="2.5" fill="#00e5ff" opacity="0.9"/>
+            <circle cx="25" cy="14" r="2.5" fill="#ff2e63" opacity="0.9"/>
+            <rect x="18" y="18" width="8" height="2" rx="1" fill="#ff2e63" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="id-name">Arjun Mehta</div>
+        <div class="id-role">FOUNDING PARTNER</div>
+        <div class="id-affil">"I fund the ideas that scare incumbents most. Show me something dangerous."</div>
+        <div class="id-status"><div class="id-status-dot"></div>ONLINE // MUMBAI</div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="id-card" id="card-sara">
+        <div class="id-meta">AGENT_ID: JDG-003</div>
+        <div class="id-avatar" aria-hidden="true">
+          <svg viewBox="0 0 44 44" fill="none">
+            <circle cx="22" cy="15" r="8" fill="rgba(0,229,255,0.12)" stroke="#00e5ff" stroke-width="1.5"/>
+            <path d="M8 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
+            <ellipse cx="19" cy="14" rx="3" ry="2.5" fill="#00e5ff" opacity="0.8"/>
+            <ellipse cx="25" cy="14" rx="3" ry="2.5" fill="#ff2e63" opacity="0.8"/>
+            <path d="M17 19 Q22 23 27 19" stroke="#00e5ff" stroke-width="1" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="id-name">Sara Chen</div>
+        <div class="id-role">QUANTUM RESEARCHER</div>
+        <div class="id-affil">"Classical problems need quantum thinking. The ceiling doesn't exist."</div>
+        <div class="id-status"><div class="id-status-dot"></div>ONLINE // MIT</div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="id-card" id="card-rohan">
+        <div class="id-meta">AGENT_ID: JDG-004</div>
+        <div class="id-avatar" aria-hidden="true">
+          <svg viewBox="0 0 44 44" fill="none">
+            <circle cx="22" cy="15" r="8" fill="rgba(255,46,99,0.12)" stroke="#ff2e63" stroke-width="1.5"/>
+            <path d="M8 40c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#ff2e63" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="22" cy="14" r="4" fill="none" stroke="#00e5ff" stroke-width="1.5"/>
+            <circle cx="22" cy="14" r="1.5" fill="#ff2e63"/>
+            <line x1="12" y1="22" x2="32" y2="22" stroke="#ff2e63" stroke-width="1" opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="id-name">Rohan Kapoor</div>
+        <div class="id-role">CTO // DEEP TECH</div>
+        <div class="id-affil">"Robotics at scale is the only moonshot left. Build it here or watch someone else."</div>
+        <div class="id-status"><div class="id-status-dot"></div>ONLINE // DELHI</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     FOOTER
+================================================================ -->
+<footer role="contentinfo">
+  <div class="container">
+
+    <!-- Glowing divider -->
+    <div class="footer-divider" aria-hidden="true"></div>
+
+    <div class="footer-grid">
+
+      <!-- Brand col -->
+      <div class="footer-brand">
+        <a href="#hero" class="nav-logo" aria-label="Techfest Home" style="margin-bottom:14px;display:inline-flex;">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" style="margin-right:8px">
+            <rect x="1" y="1" width="30" height="30" rx="7" stroke="url(#fg)" stroke-width="1.5"/>
+            <path d="M9 23 L16 9 L23 23" stroke="url(#fg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="12" y1="18" x2="20" y2="18" stroke="#00e5ff" stroke-width="1.5" stroke-linecap="round"/>
+            <defs>
+              <linearGradient id="fg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#ff2e63"/>
+                <stop offset="1" stop-color="#00e5ff"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>TechFest</span>
+        </a>
+        <p>India's most electrifying college tech festival. Where engineers stop simulating the future and start building it.</p>
+
+        <!-- Social -->
+        <div class="footer-social" role="list" aria-label="Social media">
+          <a href="#" class="soc-btn" id="social-x"  aria-label="X (Twitter)" role="listitem">
+            <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="#" class="soc-btn" id="social-gh" aria-label="GitHub" role="listitem">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          </a>
+          <a href="#" class="soc-btn" id="social-li" aria-label="LinkedIn" role="listitem">
+            <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <a href="#" class="soc-btn" id="social-ig" aria-label="Instagram" role="listitem">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Events col -->
+      <div>
+        <div class="footer-heading">Events</div>
+        <ul class="footer-links" role="list">
+          <li><a href="#tracks">AI / ML Arena</a></li>
+          <li><a href="#tracks">Cyber Warfare</a></li>
+          <li><a href="#tracks">Quantum Lab</a></li>
+          <li><a href="#tracks">Robotics Pit</a></li>
+          <li><a href="#tracks">Hardware Hack</a></li>
+        </ul>
+      </div>
+
+      <!-- Resources col -->
+      <div>
+        <div class="footer-heading">Resources</div>
+        <ul class="footer-links" role="list">
+          <li><a href="#schedule">How to Register</a></li>
+          <li><a href="#schedule">Problem Statements</a></li>
+          <li><a href="#schedule">Rulebook</a></li>
+          <li><a href="#speakers">Mentors</a></li>
+          <li><a href="#">Past Winners</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact + sponsors col -->
+      <div>
+        <div class="footer-heading">Connect</div>
+        <ul class="footer-links" role="list">
+          <li><a href="mailto:contact@techfest.in">contact@techfest.in</a></li>
+          <li><a href="#">Press Kit</a></li>
+          <li><a href="#">Sponsor Us</a></li>
+          <li><a href="#">Volunteer</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+        </ul>
+
+        <!-- Sponsors -->
+        <div class="footer-heading" style="margin-top:24px">Sponsors</div>
+        <div class="sponsors-row" role="list" aria-label="Sponsors">
+          <div class="sponsor-badge" role="listitem">NVIDIA</div>
+          <div class="sponsor-badge" role="listitem">IBM</div>
+          <div class="sponsor-badge" role="listitem">AWS</div>
+          <div class="sponsor-badge" role="listitem">QUALCOMM</div>
+        </div>
+      </div>
+
+    </div><!-- .footer-grid -->
+
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2026 TECHFEST — IIT MUMBAI. ALL SYSTEMS OPERATIONAL.</div>
+      <div class="footer-build">BUILD v12.0.0 // NODE: PROD</div>
+    </div>
+  </div>
+</footer>
+
+<!-- ================================================================
+     INLINE JAVASCRIPT
+================================================================ -->
+<script>
+'use strict';
+
+/* ─── 1. NAVBAR — scroll glass + mobile drawer ─── */
+(function () {
+  const nav  = document.getElementById('navbar');
+  const ham  = document.getElementById('hamburger');
+  const drawer = document.getElementById('mobileDrawer');
+
+  // Add glass effect once scrolled
+  window.addEventListener('scroll', function () {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  }, { passive: true });
+
+  // Hamburger toggle
+  ham.addEventListener('click', function () {
+    const open = drawer.classList.toggle('open');
+    ham.classList.toggle('open', open);
+    ham.setAttribute('aria-expanded', String(open));
+  });
+
+  // Close drawer on link click
+  drawer.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function () {
+      drawer.classList.remove('open');
+      ham.classList.remove('open');
+      ham.setAttribute('aria-expanded', 'false');
+    });
+  });
+}());
+
+/* ─── 2. STATS COUNTER — IntersectionObserver only ─── */
+(function () {
+  /**
+   * Cubic ease-out count-up animation.
+   * @param {HTMLElement} el  - element with data-target attribute
+   */
+  function animateCount(el) {
+    var target   = parseInt(el.dataset.target, 10);
+    var duration = 1800; // ms
+    var start    = performance.now();
+
+    function step(now) {
+      var p = Math.min((now - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3); // cubic ease-out
+      el.textContent = Math.floor(target * eased).toLocaleString('en-IN');
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  // Guard: only run if IntersectionObserver is available
+  if (!('IntersectionObserver' in window)) {
+    // Fallback: set final values immediately
+    document.querySelectorAll('.counter').forEach(function (el) {
+      el.textContent = el.dataset.target;
+    });
+    return;
+  }
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        animateCount(e.target);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  document.querySelectorAll('.counter').forEach(function (el) {
+    io.observe(el);
+  });
+}());
+
+/* ─── 3. SMOOTH SCROLL with navbar offset ─── */
+(function () {
+  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+    a.addEventListener('click', function (e) {
+      var id = this.getAttribute('href');
+      if (id === '#') return;
+      var target = document.querySelector(id);
+      if (!target) return;
+      e.preventDefault();
+      var offset = window.innerWidth <= 600 ? 60 : 72;
+      window.scrollTo({
+        top: target.getBoundingClientRect().top + window.scrollY - offset,
+        behavior: 'smooth'
+      });
+    });
+  });
+}());
+
+/* ─── 4. CARD 3-D TILT (feature + ID cards) ─── */
+(function () {
+  var cards = document.querySelectorAll('.track-card, .id-card');
+
+  cards.forEach(function (card) {
+    card.addEventListener('mouseenter', function () {
+      this.style.transition = 'transform 0.12s ease, border-color 0.3s ease, box-shadow 0.3s ease';
+    });
+    card.addEventListener('mousemove', function (e) {
+      var r = this.getBoundingClientRect();
+      var x = (e.clientX - r.left) / r.width  - 0.5;
+      var y = (e.clientY - r.top)  / r.height - 0.5;
+      this.style.transform =
+        'translateY(-4px) rotateX(' + (-y * 5).toFixed(2) + 'deg) rotateY(' + (x * 5).toFixed(2) + 'deg)';
+    });
+    card.addEventListener('mouseleave', function () {
+      this.style.transition = 'transform 0.5s ease, border-color 0.3s ease, box-shadow 0.3s ease';
+      this.style.transform  = 'translateY(0) rotateX(0) rotateY(0)';
+    });
+  });
+}());
+
+/* ─── 5. FOCUS TRAP in mobile drawer (accessibility) ─── */
+(function () {
+  var drawer = document.getElementById('mobileDrawer');
+  drawer.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    var focusable = drawer.querySelectorAll('a, button');
+    var first = focusable[0];
+    var last  = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+    }
+  });
+}());
+
+/* ─── 6. ANIMATED NEURAL-NETWORK / CIRCUIT BACKGROUND ─── */
+(function () {
+  var canvas = document.getElementById('bg-canvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+
+  /* ── color palette ── */
+  var MG  = { r:255, g:46,  b:99  };   /* magenta  #ff2e63 */
+  var CY  = { r:0,   g:229, b:255 };   /* cyan     #00e5ff */
+  var VI  = { r:124, g:58,  b:237 };   /* violet   #7c3aed */
+
+  function rgba(c, a) {
+    return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + a + ')';
+  }
+
+  /* ── resize ── */
+  var W, H;
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+
+  /* ── prefers-reduced-motion gate ── */
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ── cursor tracking (raw + lerp-smoothed) ── */
+  var mouse    = { x: W / 2, y: H / 2 };  /* raw cursor position   */
+  var cursor   = { x: W / 2, y: H / 2 };  /* lerp-smoothed follower */
+  var LERP     = 0.06;                     /* easing factor (0=no move, 1=instant) */
+  var PULL_R   = 200;                      /* px radius of magnetic attraction      */
+  var PULL_STR = 0.018;                    /* strength of pull (subtle)             */
+
+  if (!reducedMotion) {
+    window.addEventListener('mousemove', function (e) {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    }, { passive: true });
+  }
+
+  /* ── node setup ── */
+  var NODE_COUNT = Math.min(Math.floor(window.innerWidth / 14), 90);
+  var LINK_DIST  = 180;   /* max px distance for a connection */
+  var SPEED      = 0.28;  /* base drift speed */
+
+  var PALETTE = [MG, MG, CY, CY, VI];
+  var nodes   = [];
+
+  function makeNode() {
+    var col = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+    return {
+      x:   Math.random() * W,
+      y:   Math.random() * H,
+      vx:  (Math.random() - 0.5) * SPEED,
+      vy:  (Math.random() - 0.5) * SPEED,
+      r:   Math.random() * 2 + 1.5,   /* 1.5–3.5 px radius */
+      col: col,
+      pulse: Math.random() * Math.PI * 2,  /* phase offset */
+      pRate: 0.012 + Math.random() * 0.018
+    };
+  }
+
+  for (var i = 0; i < NODE_COUNT; i++) nodes.push(makeNode());
+
+  /* ── circuit trace segments (static waypoints that drift slowly) ── */
+  var TRACE_COUNT = Math.min(Math.floor(window.innerWidth / 80), 18);
+  var traces = [];
+
+  function makeTrace() {
+    var col  = Math.random() < 0.5 ? MG : CY;
+    var x0   = Math.random() * W;
+    var y0   = Math.random() * H;
+    var len  = 60 + Math.random() * 120;
+    /* axis-aligned L-shaped circuit trace: horizontal then vertical */
+    var hLen = (Math.random() < 0.5 ? 1 : -1) * (len * 0.55);
+    var vLen = (Math.random() < 0.5 ? 1 : -1) * (len * 0.45);
+    return {
+      x:    x0,
+      y:    y0,
+      hLen: hLen,
+      vLen: vLen,
+      col:  col,
+      vx:   (Math.random() - 0.5) * 0.12,
+      vy:   (Math.random() - 0.5) * 0.12,
+      dash: 0,
+      dashSpeed: 0.6 + Math.random() * 0.8
+    };
+  }
+  for (var j = 0; j < TRACE_COUNT; j++) traces.push(makeTrace());
+
+  /* ── faint dot grid (drawn once per frame, very low opacity) ── */
+  var GRID = 52;
+
+  /* ── main draw loop ── */
+  var raf;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    /* ── lerp cursor toward raw mouse (eased follower) ── */
+    if (!reducedMotion) {
+      cursor.x += (mouse.x - cursor.x) * LERP;
+      cursor.y += (mouse.y - cursor.y) * LERP;
+    }
+
+    /* 1. faint grid of dots */
+    ctx.fillStyle = 'rgba(255,46,99,0.06)';
+    for (var gx = GRID / 2; gx < W; gx += GRID) {
+      for (var gy = GRID / 2; gy < H; gy += GRID) {
+        ctx.beginPath();
+        ctx.arc(gx, gy, 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    /* 2. circuit traces */
+    traces.forEach(function (t) {
+      t.x  += t.vx;
+      t.y  += t.vy;
+      t.dash = (t.dash + t.dashSpeed) % 40;
+      /* wrap */
+      if (t.x < -200) t.x = W + 100;
+      if (t.x > W + 200) t.x = -100;
+      if (t.y < -200) t.y = H + 100;
+      if (t.y > H + 200) t.y = -100;
+
+      ctx.save();
+      ctx.strokeStyle = rgba(t.col, 0.18);
+      ctx.lineWidth   = 0.8;
+      ctx.setLineDash([6, 8]);
+      ctx.lineDashOffset = -t.dash;
+      ctx.shadowColor    = rgba(t.col, 0.5);
+      ctx.shadowBlur     = 4;
+      ctx.beginPath();
+      ctx.moveTo(t.x, t.y);
+      ctx.lineTo(t.x + t.hLen, t.y);          /* horizontal leg */
+      ctx.lineTo(t.x + t.hLen, t.y + t.vLen); /* vertical leg   */
+      ctx.stroke();
+      /* corner dot */
+      ctx.setLineDash([]);
+      ctx.fillStyle = rgba(t.col, 0.4);
+      ctx.beginPath();
+      ctx.arc(t.x + t.hLen, t.y, 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    /* 3. connection edges between nearby nodes */
+    for (var a = 0; a < nodes.length; a++) {
+      for (var b = a + 1; b < nodes.length; b++) {
+        var na = nodes[a], nb = nodes[b];
+        var dx = na.x - nb.x, dy = na.y - nb.y;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < LINK_DIST) {
+          var alpha = (1 - dist / LINK_DIST) * 0.22;
+          /* boost edge alpha if either node is near cursor */
+          if (!reducedMotion) {
+            var dca = Math.hypot(na.x - cursor.x, na.y - cursor.y);
+            var dcb = Math.hypot(nb.x - cursor.x, nb.y - cursor.y);
+            if (dca < PULL_R || dcb < PULL_R) alpha = Math.min(alpha * 2.2, 0.55);
+          }
+          var rc = Math.random() < 0.5 ? na.col : nb.col;
+          ctx.save();
+          ctx.strokeStyle = rgba(rc, alpha);
+          ctx.lineWidth   = 0.7;
+          ctx.shadowColor = rgba(rc, alpha * 1.5);
+          ctx.shadowBlur  = 3;
+          ctx.beginPath();
+          ctx.moveTo(na.x, na.y);
+          ctx.lineTo(nb.x, nb.y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+
+    /* 4. particle nodes — drift + optional cursor magnetic pull */
+    nodes.forEach(function (n) {
+      /* drift */
+      n.x += n.vx;
+      n.y += n.vy;
+
+      /* magnetic pull toward lerp'd cursor */
+      if (!reducedMotion) {
+        var cdx  = cursor.x - n.x;
+        var cdy  = cursor.y - n.y;
+        var cdist = Math.sqrt(cdx * cdx + cdy * cdy);
+        if (cdist < PULL_R && cdist > 0.1) {
+          /* force fades with distance (linear falloff) */
+          var force = (1 - cdist / PULL_R) * PULL_STR;
+          n.x += cdx * force;
+          n.y += cdy * force;
+        }
+      }
+
+      /* bounce or wrap */
+      if (n.x < 0)  n.x = W;
+      if (n.x > W)  n.x = 0;
+      if (n.y < 0)  n.y = H;
+      if (n.y > H)  n.y = 0;
+
+      /* pulse opacity */
+      n.pulse += n.pRate;
+      var pAlpha = 0.45 + 0.55 * (0.5 + 0.5 * Math.sin(n.pulse));
+
+      /* boost node brightness when near cursor */
+      var nearCursor = false;
+      if (!reducedMotion) {
+        var nd = Math.hypot(n.x - cursor.x, n.y - cursor.y);
+        if (nd < PULL_R) {
+          pAlpha = Math.min(pAlpha + (1 - nd / PULL_R) * 0.55, 1.0);
+          nearCursor = true;
+        }
+      }
+
+      /* outer halo (larger + brighter when near cursor) */
+      var haloR = nearCursor ? n.r * 6 : n.r * 3.5;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, haloR, 0, Math.PI * 2);
+      var grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, haloR);
+      grad.addColorStop(0, rgba(n.col, pAlpha * (nearCursor ? 0.45 : 0.25)));
+      grad.addColorStop(1, rgba(n.col, 0));
+      ctx.fillStyle = grad;
+      ctx.fill();
+      ctx.restore();
+
+      /* core dot */
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r * (nearCursor ? 1.6 : 1), 0, Math.PI * 2);
+      ctx.fillStyle   = rgba(n.col, pAlpha * 0.9);
+      ctx.shadowColor = rgba(n.col, 0.8);
+      ctx.shadowBlur  = nearCursor ? 14 : 8;
+      ctx.fill();
+      ctx.restore();
+    });
+
+    /* 5. cursor aura glow (drawn last so it sits on top of particles) */
+    if (!reducedMotion) {
+      /* outer soft bloom — alternating mg/cy rings */
+      var aura1 = ctx.createRadialGradient(cursor.x, cursor.y, 0, cursor.x, cursor.y, 90);
+      aura1.addColorStop(0,   rgba(MG, 0.12));
+      aura1.addColorStop(0.4, rgba(CY, 0.06));
+      aura1.addColorStop(1,   rgba(MG, 0));
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cursor.x, cursor.y, 90, 0, Math.PI * 2);
+      ctx.fillStyle = aura1;
+      ctx.fill();
+      ctx.restore();
+
+      /* inner tight ring — magenta */
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cursor.x, cursor.y, 14, 0, Math.PI * 2);
+      ctx.strokeStyle = rgba(MG, 0.55);
+      ctx.lineWidth   = 1;
+      ctx.shadowColor = rgba(MG, 0.8);
+      ctx.shadowBlur  = 10;
+      ctx.stroke();
+      ctx.restore();
+
+      /* outer ring — cyan */
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cursor.x, cursor.y, 22, 0, Math.PI * 2);
+      ctx.strokeStyle = rgba(CY, 0.30);
+      ctx.lineWidth   = 0.8;
+      ctx.shadowColor = rgba(CY, 0.5);
+      ctx.shadowBlur  = 8;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    raf = requestAnimationFrame(draw);
+  }
+
+  /* start / pause on visibility */
+  draw();
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) { cancelAnimationFrame(raf); }
+    else { draw(); }
+  });
+}());
+</script>
+</body>
+</html>
+
