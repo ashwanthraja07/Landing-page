@@ -6,11 +6,7 @@ A fully self-contained, single-file landing page built with **HTML + CSS + JS** 
 
 ---
 
-## 🔗 Live Demo
 
-**[View Live → https://ashwanthraja07.github.io/Landing-page](https://ashwanthraja07.github.io/Landing-page)**
-
----
 
 ## ✨ Features
 
@@ -85,7 +81,6 @@ npx serve .
 
 ---
 
-## 📄 License
 
 MIT — free to use, remix, and build on.
 
